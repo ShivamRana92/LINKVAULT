@@ -1,0 +1,130 @@
+Database Schema / Model Definition
+
+
+Content Collection (MongoDB) :-
+
+The application uses a single MongoDB collection named:
+contents
+
+Defined using Mongoose.
+
+
+Content Schema :-
+const mongoose = require("mongoose");
+
+const contentSchema = new mongoose.Schema(
+  {
+    type: {
+      type: String,
+      enum: ["text", "file"],
+      required: true
+    },
+
+    text: {
+      type: String,
+      default: null
+    },
+
+    fileUrl: {
+      type: String,
+      default: null
+    },
+
+    fileName: {
+      type: String,
+      default: null
+    },
+
+    expiresAt: {
+      type: Date,
+      required: true,
+      index: { expires: 0 }   // TTL index for automatic deletion
+    },
+
+    maxViews: {
+      type: Number,
+      default: null
+    },
+
+    viewsUsed: {
+      type: Number,
+      default: 0
+    },
+
+    password: {
+      type: String,           // Hashed using bcrypt
+      default: null
+    }
+
+  },
+  { timestamps: true }
+);
+
+module.exports = mongoose.model("Content", contentSchema);
+
+
+Field Explanation :-
+
+1. type
+Indicates whether stored content is:
+-> "text" for plain text
+-> "file" for uploaded file
+
+2. text
+Stores text content (if type = "text").
+Null if file upload.
+
+3. fileUrl
+Stores relative file path:
+/uploads/filename.pdf
+Used for downloading file.
+Null for text uploads.
+
+4. fileName
+Original file name used during download.
+
+5. expiresAt
+Stores expiration timestamp.
+-> Default: 10 minutes from upload
+-> Can be custom date-time
+-> MongoDB TTL index automatically deletes expired documents
+
+TTL Index:
+index: { expires: 0 }
+This ensures expired content is removed automatically by MongoDB.
+
+6. maxViews
+Optional maximum number of views.
+-> Null → Unlimited
+-> Number → Limited access
+
+7. viewsUsed
+Tracks how many times content has been accessed.
+Used to enforce:
+-> Maximum view count
+-> One-time view links
+
+8. password
+Stores bcrypt-hashed password.
+If null:
+-> Public link (no password)
+If present:
+-> Requires password before access
+
+
+Sample Document :-
+
+Example stored document:
+{
+  "_id": "65f7ab9c2d8e1a4c6f123456",
+  "type": "text",
+  "text": "This is confidential content.",
+  "fileUrl": null,
+  "fileName": null,
+  "expiresAt": "2026-02-16T10:30:00.000Z",
+  "maxViews": 2,
+  "viewsUsed": 1,
+  "password": "$2b$10$XhD8K...",
+  "createdAt": "2026-02-15T10:20:00.000Z",
+  "updatedAt": "2026-02-15T10:25:00.000Z"
+}
