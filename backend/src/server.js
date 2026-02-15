@@ -6,7 +6,7 @@ const path = require("path");
 // Connect Database
 connectDB();
 
-// 🔥 Serve uploaded files statically
+// Serve uploaded files statically
 app.use(
   "/uploads",
   require("express").static(path.join(__dirname, "uploads"))

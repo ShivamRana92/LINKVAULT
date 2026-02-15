@@ -84,7 +84,7 @@ router.post(
 // Get (password-aware POST)
 router.post("/:id", getContent);
 
-// 🔥 Manual Delete Route
+// Manual Delete Route
 router.delete("/:id", deleteContent);
 
 module.exports = router;
